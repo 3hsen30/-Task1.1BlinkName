@@ -1,0 +1,93 @@
+#include <Arduino.h>
+// Ehsen Tahir
+//////////////////////////////
+// Global Variables
+//////////////////////////////
+
+/**The pin that the button is connected to*/
+const int kPinButton = 2;
+
+/**The in-built LED pin on Arduino Nano 33 IoT*/
+const int kPinBuiltInLED = LED_BUILTIN;
+
+/** Morse code representation of the name "Ehsen" */
+const char* kMorseE = ". ";
+const char* kMorseH = ".... ";
+const char* kMorseS = "... ";
+const char* kMorseE2 = ". ";
+const char* kMorseN = ".- ";
+
+/** Morse code representation separator */
+const char* kMorseSeparator = " ";
+
+////////////////////////////////
+// Function definitions
+////////////////////////////////
+
+/** Run once after the Arduino is connected*/
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(kPinButton, INPUT_PULLUP); // Turn on pull-up resistor
+  pinMode(kPinBuiltInLED, OUTPUT);
+}
+
+/** Blink a Morse code character */
+void blinkMorse(const char* morse)
+{
+  for (int i = 0; morse[i] != '\0'; i++)
+  {
+    if (morse[i] == '.')
+    {
+      digitalWrite(kPinBuiltInLED, HIGH);
+      delay(200); // Dot duration
+    }
+    else if (morse[i] == '-')
+    {
+      digitalWrite(kPinBuiltInLED, HIGH);
+      delay(600); // Dash duration
+    }
+    digitalWrite(kPinBuiltInLED, LOW);
+    delay(200); // Inter-element gap
+  }
+}
+
+/** Run repeatedly after the Arduino is connected*/
+void loop()
+{
+    static bool isBlinking = false;
+    static bool buttonState = HIGH;
+    static bool lastButtonState = HIGH;
+    static unsigned long lastDebounceTime = 0;
+    const unsigned long debounceDelay = 50;
+
+    int buttonStateRaw = digitalRead(kPinButton);
+    if (buttonStateRaw != lastButtonState)
+    {
+        lastDebounceTime = millis();
+    }
+
+    if (millis() - lastDebounceTime > debounceDelay)
+    {
+        if (buttonStateRaw != buttonState)
+        {
+            buttonState = buttonStateRaw;
+
+            if (buttonState == LOW)
+            {
+                isBlinking = !isBlinking; // Toggle blinking state
+                if (isBlinking)
+                {
+                    blinkMorse(kMorseE);
+                    blinkMorse(kMorseH);
+                    blinkMorse(kMorseS);
+                    blinkMorse(kMorseE2);
+                    blinkMorse(kMorseN);
+                    blinkMorse(kMorseSeparator);
+                }
+            }
+        }
+    }
+
+    lastButtonState = buttonStateRaw;
+} 
